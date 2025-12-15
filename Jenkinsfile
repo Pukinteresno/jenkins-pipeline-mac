@@ -13,11 +13,15 @@ pipeline {
                 sh 'echo "Tests passed!"'
             }
         }
-        stage('Deploy') {
+         stage('Deploy') {
             steps {
-                echo 'Deploy stage (local)'
-                sh 'docker images'
+                echo 'Pushing Docker image to DockerHub...'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'docker tag myapp:latest $DOCKER_USER/my-pipeline-app:latest'
+                    sh 'docker push $DOCKER_USER/my-pipeline-app:latest'
+                }
             }
-        }
+        }        }
     }
 }
